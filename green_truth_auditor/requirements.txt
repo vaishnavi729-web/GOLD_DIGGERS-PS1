@@ -1,0 +1,13 @@
+flask
+flask-cors
+torch
+torchvision
+transformers
+sentence-transformers
+beautifulsoup4
+requests
+pillow
+easyocr
+pandas
+numpy
+accelerate

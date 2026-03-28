@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Green-Truth Auditor | AI-Powered Greenwashing Detection</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+        rel="stylesheet">
+
+    <!-- GSAP & Three.js for 3D Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            overflow-x: hidden;
+        }
+
+        /* Custom Gradient Backgrounds */
+        .gradient-bg {
+            background: radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 100%);
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(59, 130, 246, 0.3));
+            padding: 1px;
+            border-radius: 2rem;
+        }
+
+        .gradient-border>* {
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+        }
+
+        /* Glassmorphism Enhanced */
+        .glass-premium {
+            background: rgba(15, 25, 35, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-premium-light {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Animated Score Ring */
+        .score-ring {
+            transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Hover Effects */
+        .hover-glow:hover {
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            border-radius: 10px;
+        }
+
+        /* Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.6s ease-out forwards;
+        }
+
+        /* Loading Shimmer */
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Tab Styles */
+        .tab-active {
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Chat Widget */
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            border-radius: 20px 20px 5px 20px;
+        }
+
+        .chat-bubble-bot {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px 20px 20px 5px;
+        }
+
+        /* Card Hover */
+        .product-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+
+<body class="gradient-bg text-white">
+    <!-- 3D Canvas Background -->
+    <canvas id="bg-canvas"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;"></canvas>
+
+    <!-- Navigation -->
+    <nav class="relative z-20 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center space-x-3">
+            <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center shadow-lg animate-float">
+                <i class="fas fa-leaf text-white text-xl"></i>
+            </div>
+            <div>
+                <h1
+                    class="text-2xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                    Green-Truth Auditor
+                </h1>
+                <p class="text-xs text-gray-400">AI-Powered Sustainability Intelligence</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="theme-toggle" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
+                <i class="fas fa-moon text-blue-400"></i>
+            </button>
+            <div class="h-8 w-px bg-white/10"></div>
+            <div class="flex items-center space-x-2 text-sm">
+                <i class="fas fa-shield-alt text-emerald-500"></i>
+                <span class="text-gray-400">v2.0 | BETA</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-8 text-center">
+        <div class="inline-flex items-center space-x-2 bg-white/5 rounded-full px-4 py-2 mb-6 backdrop-blur-sm">
+            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            <span class="text-xs text-gray-300">Powered by ClimateBERT + GPT-4 Vision</span>
+        </div>
+        <h1
+            class="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-emerald-200 to-blue-200 bg-clip-text text-transparent">
+            Expose Greenwashing
+        </h1>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+            Advanced AI analyzes product claims, certifications, and packaging to detect deceptive sustainability
+            marketing
+        </p>
+    </div>
+
+    <!-- Main Input Card -->
+    <div class="relative z-10 max-w-4xl mx-auto px-6 mt-8">
+        <div class="gradient-border">
+            <div class="p-8">
+                <!-- Tabs -->
+                <div class="flex justify-center space-x-3 mb-8">
+                    <button onclick="switchTab('text')" id="tab-text-btn"
+                        class="tab-active px-6 py-2.5 rounded-xl font-medium transition-all flex items-center space-x-2">
+                        <i class="fas fa-align-left text-sm"></i>
+                        <span>Text Analysis</span>
+                    </button>
+                    <button onclick="switchTab('url')" id="tab-url-btn"
+                        class="px-6 py-2.5 rounded-xl font-medium transition-all flex items-center space-x-2 bg-white/5 hover:bg-white/10">
+                        <i class="fas fa-link text-sm"></i>
+                        <span>URL Scanner</span>
+                    </button>
+                    <button onclick="switchTab('image')" id="tab-image-btn"
+                        class="px-6 py-2.5 rounded-xl font-medium transition-all flex items-center space-x-2 bg-white/5 hover:bg-white/10">
+                        <i class="fas fa-camera text-sm"></i>
+                        <span>Image OCR</span>
+                    </button>
+                </div>
+
+                <!-- Text Input -->
+                <div id="text-input-area" class="space-y-4">
+                    <textarea id="main-text" rows="5"
+                        placeholder="Paste product description here...&#10;&#10;Example: 'Our 100% natural, eco-friendly bamboo toothbrush is biodegradable and sustainably sourced.'"
+                        class="w-full bg-black/30 border border-white/10 rounded-2xl p-5 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none resize-none"></textarea>
+                </div>
+
+                <!-- URL Input (Hidden) -->
+                <div id="url-input-area" class="hidden space-y-4">
+                    <input type="url" id="main-url" placeholder="https://example.com/product-page"
+                        class="w-full bg-black/30 border border-white/10 rounded-2xl p-5 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none">
+                </div>
+
+                <!-- Image Input (Hidden) -->
+                <div id="image-input-area" class="hidden">
+                    <div id="drop-zone"
+                        class="border-2 border-dashed border-white/20 rounded-2xl p-12 text-center cursor-pointer hover:border-emerald-500 transition-all">
+                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-500 mb-4"></i>
+                        <p class="text-gray-400 mb-2">Drag & drop product images here</p>
+                        <p class="text-xs text-gray-500">or <span class="text-emerald-500 font-semibold">click to
+                                browse</span></p>
+                        <input type="file" id="file-input" class="hidden" accept="image/*" multiple>
+                        <div id="image-preview" class="flex flex-wrap justify-center gap-4 mt-6"></div>
+                    </div>
+                </div>
+
+                <!-- Analyze Button -->
+                <button onclick="analyze()" id="analyze-btn"
+                    class="w-full mt-8 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold py-4 rounded-2xl transition-all transform hover:scale-[1.02] flex items-center justify-center space-x-2 shadow-lg">
+                    <span id="btn-text">Analyze Sustainability</span>
+                    <i id="btn-icon" class="fas fa-arrow-right"></i>
+                    <div id="btn-spinner"
+                        class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-area" class="hidden relative z-10 max-w-7xl mx-auto px-6 py-12 space-y-8">
+        <!-- Score & Metrics Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Score Card -->
+            <div class="glass-premium rounded-3xl p-8 text-center transform transition-all hover-glow">
+                <div class="relative inline-block">
+                    <svg class="w-48 h-48 transform -rotate-90">
+                        <circle cx="96" cy="96" r="88" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" />
+                        <circle id="score-ring" cx="96" cy="96" r="88" fill="none" stroke="url(#gradient)"
+                            stroke-width="12" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553"
+                            class="score-ring" />
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#10b981" />
+                                <stop offset="100%" stop-color="#3b82f6" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="score-value" class="text-6xl font-bold">0</span>
+                        <span class="text-sm text-gray-400 mt-1">/ 100</span>
+                        <div id="score-badge"
+                            class="mt-3 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400">
+                            Calculating...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buzzword Detection Card -->
+            <div class="glass-premium rounded-3xl p-8 lg:col-span-2">
+                <div class="flex items-center space-x-2 mb-6">
+                    <i class="fas fa-microphone-alt text-emerald-500 text-xl"></i>
+                    <h3 class="text-xl font-semibold">Buzzword Detection</h3>
+                    <span class="text-xs text-gray-500 ml-auto">Real-time pattern matching</span>
+                </div>
+                <div id="buzzword-list" class="flex flex-wrap gap-3 min-h-[120px]">
+                    <!-- Dynamic buzzwords -->
+                </div>
+                <div id="no-buzzwords" class="hidden text-gray-500 text-center py-8 italic">
+                    <i class="fas fa-check-circle text-emerald-500 mr-2"></i>No marketing buzzwords detected
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Analysis & Certifications -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-premium rounded-3xl p-8">
+                <div class="flex items-center space-x-2 mb-6">
+                    <i class="fas fa-brain text-purple-400 text-xl"></i>
+                    <h3 class="text-xl font-semibold">ClimateBERT Analysis</h3>
+                </div>
+                <div id="classification-badge"
+                    class="inline-flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    <i class="fas fa-chart-line"></i>
+                    <span id="classification-text">Analyzing...</span>
+                </div>
+                <p id="ai-summary" class="text-gray-300 leading-relaxed">
+                    Our AI is processing your product claims...
+                </p>
+                <div class="mt-6 pt-6 border-t border-white/10">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-400">Evidence Score</span>
+                        <span id="evidence-score" class="text-emerald-400 font-semibold">0%</span>
+                    </div>
+                    <div class="w-full bg-white/10 rounded-full h-2 mt-2">
+                        <div id="evidence-bar"
+                            class="bg-gradient-to-r from-emerald-500 to-blue-500 h-2 rounded-full transition-all"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-premium rounded-3xl p-8">
+                <div class="flex items-center space-x-2 mb-6">
+                    <i class="fas fa-certificate text-yellow-500 text-xl"></i>
+                    <h3 class="text-xl font-semibold">Certification Verification</h3>
+                </div>
+                <div id="certs-list" class="grid grid-cols-2 gap-3">
+                    <!-- Dynamic certifications -->
+                </div>
+                <div id="no-certs" class="hidden text-gray-500 text-center py-8 italic">
+                    <i class="fas fa-search text-gray-600 mr-2"></i>No certifications detected
+                </div>
+            </div>
+        </div>
+
+        <!-- Contradiction Alert -->
+        <div id="contradiction-alert"
+            class="hidden bg-red-500/10 border border-red-500/30 rounded-3xl p-6 flex items-start space-x-4 backdrop-blur-sm">
+            <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-red-400"></i>
+            </div>
+            <div>
+                <h4 class="text-red-400 font-bold mb-1">Semantic Contradiction Detected</h4>
+                <p id="contradiction-text" class="text-gray-300 text-sm"></p>
+            </div>
+        </div>
+
+        <!-- Certified Alternatives -->
+        <div class="space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3
+                        class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                        Certified Alternatives</h3>
+                    <p class="text-sm text-gray-500 mt-1">Verified sustainable products from our database</p>
+                </div>
+                <i class="fas fa-arrow-right text-gray-500"></i>
+            </div>
+            <div id="alternatives-carousel" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Product cards -->
+            </div>
+        </div>
+
+        <!-- Community Reports -->
+        <div class="glass-premium rounded-3xl p-8">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-xl font-semibold flex items-center space-x-2">
+                        <i class="fas fa-users text-emerald-500"></i>
+                        <span>Community Watch</span>
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">Crowdsourced greenwashing reports</p>
+                </div>
+                <button onclick="openReportModal()"
+                    class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-2 rounded-xl text-sm transition-all flex items-center space-x-2">
+                    <i class="fas fa-flag"></i>
+                    <span>Report Greenwashing</span>
+                </button>
+            </div>
+            <div id="reports-list" class="space-y-3">
+                <!-- Dynamic reports -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div id="chat-widget" class="fixed bottom-6 right-6 z-50">
+        <button onclick="toggleChat()"
+            class="w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 shadow-2xl flex items-center justify-center hover:scale-110 transition-all">
+            <i class="fas fa-robot text-white text-xl"></i>
+        </button>
+        <div id="chat-window"
+            class="hidden absolute bottom-20 right-0 w-96 h-[500px] glass-premium rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+            <div class="bg-gradient-to-r from-emerald-600 to-blue-600 p-4 text-white">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-brain"></i>
+                        <span class="font-semibold">Green Assistant</span>
+                    </div>
+                    <i class="fas fa-times cursor-pointer hover:scale-110 transition-all" onclick="toggleChat()"></i>
+                </div>
+                <p class="text-xs opacity-80 mt-1">Ask me about sustainability scores</p>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <div class="chat-bubble-bot p-3 max-w-[85%] text-sm">
+                    👋 Hi! I'm your sustainability assistant. Ask me about the analysis results, buzzwords, or
+                    certifications!
+                </div>
+            </div>
+            <div class="p-4 border-t border-white/10 flex space-x-2">
+                <input type="text" id="chat-input" placeholder="Type your question..."
+                    class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm outline-none focus:border-emerald-500 transition-all">
+                <button onclick="sendChatMessage()"
+                    class="bg-emerald-500 hover:bg-emerald-600 w-10 h-10 rounded-xl flex items-center justify-center transition-all">
+                    <i class="fas fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="glass-premium rounded-3xl max-w-md w-full p-8 transform transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Report Greenwashing</h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="report-brand" placeholder="Brand Name"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl p-3 outline-none focus:border-emerald-500">
+                <textarea id="report-reason" rows="3" placeholder="Describe the misleading claim..."
+                    class="w-full bg-white/5 border border-white/10 rounded-xl p-3 outline-none focus:border-emerald-500"></textarea>
+                <input type="url" id="report-url" placeholder="Evidence URL (optional)"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl p-3 outline-none focus:border-emerald-500">
+                <div class="flex space-x-3 pt-4">
+                    <button onclick="closeReportModal()"
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-xl transition-all">Cancel</button>
+                    <button onclick="submitReport()"
+                        class="flex-1 bg-red-500 hover:bg-red-600 py-3 rounded-xl transition-all font-semibold">Submit
+                        Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js Background
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const geometry = new THREE.TorusKnotGeometry(2, 0.5, 200, 32);
+        const material = new THREE.MeshBasicMaterial({ color: 0x10b981, wireframe: true, transparent: true, opacity: 0.15 });
+        const knot = new THREE.Mesh(geometry, material);
+        scene.add(knot);
+
+        camera.position.z = 8;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            knot.rotation.x += 0.005;
+            knot.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        let currentTab = 'text';
+        let currentAnalysisContext = {};
+        let base64Image = null;
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('[id$="-btn"]').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('bg-white/5', 'hover:bg-white/10');
+            });
+            document.getElementById(`tab-${tab}-btn`).classList.add('tab-active');
+            document.getElementById(`tab-${tab}-btn`).classList.remove('bg-white/5', 'hover:bg-white/10');
+
+            document.getElementById('text-input-area').classList.add('hidden');
+            document.getElementById('url-input-area').classList.add('hidden');
+            document.getElementById('image-input-area').classList.add('hidden');
+            document.getElementById(`${tab}-input-area`).classList.remove('hidden');
+        }
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const imagePreview = document.getElementById('image-preview');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            imagePreview.innerHTML = '';
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    base64Image = e.target.result;
+                    const img = document.createElement('img');
+                    img.src = base64Image;
+                    img.className = 'w-24 h-24 object-cover rounded-xl shadow-lg';
+                    imagePreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function analyze() {
+            const btn = document.getElementById('analyze-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnIcon = document.getElementById('btn-icon');
+            const spinner = document.getElementById('btn-spinner');
+
+            let content = '';
+            if (currentTab === 'text') content = document.getElementById('main-text').value;
+            else if (currentTab === 'url') content = document.getElementById('main-url').value;
+            else if (currentTab === 'image') content = base64Image;
+
+            if (!content) {
+                alert('Please provide product information');
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.innerText = 'Analyzing';
+            btnIcon.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            document.getElementById('results-area').classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: currentTab, content: content })
+                });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                currentAnalysisContext = data;
+                renderResults(data);
+                await getAlternatives(data.text);
+
+                gsap.fromTo('#results-area', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = 'Analyze Sustainability';
+                btnIcon.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function renderResults(data) {
+            document.getElementById('results-area').classList.remove('hidden');
+
+            // Score animation
+            let currentScore = 0;
+            const targetScore = data.score;
+            const ring = document.getElementById('score-ring');
+            const circumference = 553;
+
+            const interval = setInterval(() => {
+                if (currentScore >= targetScore) {
+                    clearInterval(interval);
+                    currentScore = targetScore;
+                }
+                document.getElementById('score-value').innerText = Math.floor(currentScore);
+                const offset = circumference - (circumference * currentScore / 100);
+                ring.style.strokeDashoffset = offset;
+                currentScore += Math.ceil(targetScore / 50);
+            }, 20);
+
+            const badge = document.getElementById('score-badge');
+            if (targetScore >= 70) {
+                badge.innerText = '✓ VERIFIED SUSTAINABLE';
+                badge.className = 'mt-3 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400';
+            } else if (targetScore >= 40) {
+                badge.innerText = '⚠️ MODERATE CONCERN';
+                badge.className = 'mt-3 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400';
+            } else {
+                badge.innerText = '⚠️ HIGH GREENWASHING RISK';
+                badge.className = 'mt-3 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-400';
+            }
+
+            // Buzzwords
+            const buzzList = document.getElementById('buzzword-list');
+            const noBuzz = document.getElementById('no-buzzwords');
+            buzzList.innerHTML = '';
+            if (data.buzzwords.length > 0) {
+                noBuzz.classList.add('hidden');
+                data.buzzwords.forEach(bw => {
+                    const el = document.createElement('div');
+                    el.className = 'bg-red-500/10 border border-red-500/30 px-4 py-2 rounded-xl text-sm flex items-center space-x-2';
+                    el.innerHTML = `<i class="fas fa-exclamation-triangle text-red-400 text-xs"></i><span class="font-medium">${bw.word}</span><span class="text-xs text-gray-500">${bw.explanation}</span>`;
+                    buzzList.appendChild(el);
+                });
+            } else {
+                noBuzz.classList.remove('hidden');
+            }
+
+            // ClimateBERT
+            const classification = data.climate_analysis.classification;
+            document.getElementById('classification-text').innerText = classification;
+            const badgeClass = classification === 'Evidence-Based' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400';
+            document.getElementById('classification-badge').className = `inline-flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold mb-4 ${badgeClass}`;
+            document.getElementById('ai-summary').innerHTML = classification === 'Evidence-Based' ?
+                '<i class="fas fa-check-circle text-emerald-500 mr-2"></i> Verified: Claims are supported by specific metrics and verifiable data.' :
+                '<i class="fas fa-exclamation-triangle text-red-500 mr-2"></i> Warning: Contains unverifiable marketing language and vague sustainability claims.';
+
+            document.getElementById('evidence-score').innerText = Math.round(data.climate_analysis.evidence_confidence * 100) + '%';
+            document.getElementById('evidence-bar').style.width = (data.climate_analysis.evidence_confidence * 100) + '%';
+
+            // Certifications
+            const certsList = document.getElementById('certs-list');
+            const noCerts = document.getElementById('no-certs');
+            certsList.innerHTML = '';
+            if (data.certifications.length > 0) {
+                noCerts.classList.add('hidden');
+                data.certifications.forEach(cert => {
+                    const el = document.createElement('div');
+                    el.className = 'bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center space-x-2';
+                    el.innerHTML = `<i class="fas fa-check-circle text-emerald-500"></i><span class="text-sm font-medium">${cert}</span>`;
+                    certsList.appendChild(el);
+                });
+            } else {
+                noCerts.classList.remove('hidden');
+            }
+
+            // Contradiction
+            if (data.contradiction.has_contradiction) {
+                document.getElementById('contradiction-alert').classList.remove('hidden');
+                document.getElementById('contradiction-text').innerText = data.contradiction.explanation;
+            } else {
+                document.getElementById('contradiction-alert').classList.add('hidden');
+            }
+
+            loadReports();
+        }
+
+        async function getAlternatives(text) {
+            const container = document.getElementById('alternatives-carousel');
+            container.innerHTML = '<div class="glass-premium rounded-3xl p-8 shimmer h-64"></div>'.repeat(3);
+
+            try {
+                const response = await fetch('/api/alternatives', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                const brands = await response.json();
+
+                container.innerHTML = '';
+                brands.forEach(brand => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-premium rounded-2xl overflow-hidden product-card cursor-pointer';
+                    card.innerHTML = `
+                        <img src="${brand.product_image_url}" class="w-full h-48 object-cover" onerror="this.src='https://via.placeholder.com/300x200?text=Product'">
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold">${brand.brand_name}</h4>
+                                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full">${brand.certification_type}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-3 line-clamp-2">${brand.description}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-emerald-400 font-bold">${brand.price_range}</span>
+                                <a href="${brand.product_link}" target="_blank" class="text-sm bg-white/10 hover:bg-emerald-500 px-4 py-2 rounded-xl transition-all">Shop</a>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                container.innerHTML = '<p class="text-gray-500 text-center col-span-3">Could not load alternatives</p>';
+            }
+        }
+
+        function toggleChat() {
+            document.getElementById('chat-window').classList.toggle('hidden');
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const container = document.getElementById('chat-messages');
+            const userEl = document.createElement('div');
+            userEl.className = 'chat-bubble-user p-3 max-w-[85%] ml-auto text-white text-sm';
+            userEl.innerText = msg;
+            container.appendChild(userEl);
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            const botEl = document.createElement('div');
+            botEl.className = 'chat-bubble-bot p-3 max-w-[85%] text-sm';
+            botEl.innerHTML = '<i class="fas fa-spinner fa-pulse mr-2"></i>Thinking...';
+            container.appendChild(botEl);
+            container.scrollTop = container.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg, context: currentAnalysisContext })
+                });
+                const data = await response.json();
+                botEl.innerHTML = data.response;
+            } catch (err) {
+                botEl.innerHTML = 'Sorry, I encountered an error. Please try again.';
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function openReportModal() {
+            document.getElementById('report-modal').classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.add('hidden');
+            document.getElementById('report-brand').value = '';
+            document.getElementById('report-reason').value = '';
+            document.getElementById('report-url').value = '';
+        }
+
+        async function submitReport() {
+            const brand = document.getElementById('report-brand').value;
+            const reason = document.getElementById('report-reason').value;
+            const url = document.getElementById('report-url').value;
+
+            if (!brand || !reason) {
+                alert('Please provide brand name and reason for report');
+                return;
+            }
+
+            await fetch('/api/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ brand_name: brand, reason: reason, evidence_url: url })
+            });
+
+            closeReportModal();
+            loadReports();
+
+            // Show success toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-24 right-6 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-xl z-50 animate-slide-in';
+            toast.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Report submitted successfully';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function loadReports() {
+            try {
+                const response = await fetch('/api/reports');
+                const reports = await response.json();
+                const container = document.getElementById('reports-list');
+
+                if (reports.length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-500 py-8"><i class="fas fa-shield-alt text-3xl mb-2 opacity-50"></i><p>No reports yet. Be the first to flag greenwashing!</p></div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                reports.slice(0, 5).forEach(r => {
+                    const el = document.createElement('div');
+                    el.className = 'bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all';
+                    el.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <i class="fas fa-flag text-red-400 text-xs"></i>
+                                    <span class="font-semibold text-red-400">${escapeHtml(r.brand_name)}</span>
+                                    <span class="text-xs text-gray-500">${r.created_at || 'Just now'}</span>
+                                </div>
+                                <p class="text-sm text-gray-300">${escapeHtml(r.reason)}</p>
+                                ${r.evidence_url ? `<a href="${escapeHtml(r.evidence_url)}" target="_blank" class="text-xs text-emerald-400 hover:underline mt-1 inline-block">View Evidence <i class="fas fa-external-link-alt ml-1"></i></a>` : ''}
+                            </div>
+                            <button onclick="upvoteReport(${r.id})" class="text-gray-500 hover:text-emerald-400 transition-all text-sm">
+                                <i class="far fa-thumbs-up"></i> <span id="vote-${r.id}">0</span>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(el);
+                });
+            } catch (err) {
+                console.error('Failed to load reports:', err);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function upvoteReport(id) {
+            try {
+                const response = await fetch(`/api/report/${id}/upvote`, { method: 'POST' });
+                const data = await response.json();
+                const voteSpan = document.getElementById(`vote-${id}`);
+                if (voteSpan) voteSpan.innerText = data.votes;
+            } catch (err) {
+                console.error('Upvote failed:', err);
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter' && document.activeElement?.tagName !== 'TEXTAREA') {
+                analyze();
+            }
+            if (e.key === 'Escape') {
+                closeReportModal();
+                const chatWindow = document.getElementById('chat-window');
+                if (!chatWindow.classList.contains('hidden')) toggleChat();
+            }
+        });
+
+        // Animate elements on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.glass-premium, .gradient-border').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+
+        // Initialize with sample text for demo
+        const sampleText = document.getElementById('main-text');
+        if (sampleText) {
+            sampleText.value = 'Our 100% natural, eco-friendly bamboo toothbrush is biodegradable and sustainably sourced from organic bamboo forests.';
+        }
+
+        console.log('Green-Truth Auditor UI Ready');
+    </script>
+</body>
+
+</html>
