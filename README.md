@@ -63,6 +63,6 @@ An AI-powered greenwashing detection tool for hackathons. Focuses on speed, reli
 -   **Memory Usage**: If the app crashes, close other heavy applications to free up RAM.
 
 ## 📜 Credits
-Built for the Hackathon by Antigravity AI.
+Built for the Hackathon 
   prototype video
   https://drive.google.com/file/d/1HRcTzujedpzC-QG3hDPW72uZeVpAunwF/view?usp=drivesdk
